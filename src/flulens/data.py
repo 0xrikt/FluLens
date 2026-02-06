@@ -18,15 +18,30 @@ class FluLensDataset(Dataset):
                 if row["split"] == split:
                     self.rows.append(row)
 
-        self.transform = transforms.Compose(
-            [
-                transforms.ToTensor(),
-                transforms.Normalize(
-                    mean=[0.485, 0.456, 0.406],
-                    std=[0.229, 0.224, 0.225],
-                ),
-            ]
-        )
+        if split == "train":
+            self.transform = transforms.Compose(
+                [
+                    transforms.RandomResizedCrop(224, scale=(0.85, 1.0)),
+                    transforms.RandomHorizontalFlip(),
+                    transforms.ColorJitter(brightness=0.2, contrast=0.2),
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=[0.485, 0.456, 0.406],
+                        std=[0.229, 0.224, 0.225],
+                    ),
+                ]
+            )
+        else:
+            self.transform = transforms.Compose(
+                [
+                    transforms.Resize((224, 224)),
+                    transforms.ToTensor(),
+                    transforms.Normalize(
+                        mean=[0.485, 0.456, 0.406],
+                        std=[0.229, 0.224, 0.225],
+                    ),
+                ]
+            )
 
     def __len__(self):
         return len(self.rows)

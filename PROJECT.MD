@@ -7,8 +7,8 @@
 由于暂无真实流感/禽流感阳性/阴性标注数据，本项目当前实现基于公开数据集 **IDR idr0128 (Georgi et al. Influenza A virus screen)**。该数据集中以高内涵显微成像记录了感染强度，`ImageData.csv` 提供每张图像的 `numberOfInfectedNuclei` 等指标。
 
 为保证可训练、可评估，本实现将二分类定义为：
-* **低感染 (label=0)**：`numberOfInfectedNuclei` 位于训练集 **20% 分位及以下**。
-* **高感染 (label=1)**：`numberOfInfectedNuclei` 位于训练集 **80% 分位及以上**。
+* **低感染 (label=0)**：`numberOfInfectedNuclei` 位于训练集 **10% 分位及以下**。
+* **高感染 (label=1)**：`numberOfInfectedNuclei` 位于训练集 **90% 分位及以上**。
 
 这是一种“感染强度分层”的替代口径，**并非严格的感染/未感染**。若后续引入真实阴性样本，应替换此口径并重新训练与评估。
 
@@ -46,7 +46,7 @@ python3 /Users/rik/projects/FluLens/scripts/prepare_idr0128.py
 
 如果下载受限，可基于已下载图片构建清单：
 ```
-python3 /Users/rik/projects/FluLens/scripts/build_manifest.py --max-train 40 --max-val 10 --max-test 40
+python3 /Users/rik/projects/FluLens/scripts/build_manifest.py --max-train 120 --max-val 30 --max-test 120
 ```
 
 ### [cite_start]第二阶段：自监督预训练 (BYOL) [cite: 127]
@@ -122,7 +122,7 @@ npm run build
 网页端使用 ONNX Runtime Web 在浏览器内完成推理，模型文件位于：
 `web/public/models/flulens.onnx`
 
-## 5. 程序员开发建议
+## 5. 程序开发备注
 1. **代码适配**：使用 `torch.device("mps")` 替代 `cuda`。
 2. **Batch Size 优化**：利用 48GB 显存优势，建议设置较高的 `batch_size`（如 128/256）以加速收敛。
 3. **数据读取**：设置 `num_workers` 以匹配 M4 Pro 的核心数。

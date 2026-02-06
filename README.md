@@ -26,7 +26,7 @@ python3 /Users/rik/projects/FluLens/scripts/prepare_idr0128.py
 ```
 If downloads are limited, build a manifest from already-downloaded images:
 ```
-python3 /Users/rik/projects/FluLens/scripts/build_manifest.py --max-train 40 --max-val 10 --max-test 40
+python3 /Users/rik/projects/FluLens/scripts/build_manifest.py --max-train 120 --max-val 30 --max-test 120
 ```
 
 2) Train model:
@@ -70,7 +70,7 @@ python3 /Users/rik/projects/FluLens/scripts/prepare_idr0128.py
 ```
 如果下载受限，可基于已下载图片构建清单：
 ```
-python3 /Users/rik/projects/FluLens/scripts/build_manifest.py --max-train 40 --max-val 10 --max-test 40
+python3 /Users/rik/projects/FluLens/scripts/build_manifest.py --max-train 120 --max-val 30 --max-test 120
 ```
 
 2) 训练模型：

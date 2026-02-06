@@ -7,8 +7,8 @@ from pathlib import Path
 import pandas as pd
 
 SEED = 42
-LOW_Q = 0.2
-HIGH_Q = 0.8
+LOW_Q = 0.1
+HIGH_Q = 0.9
 
 TRAIN_PLATE = "180426-6-53-IAV-1A_Plate_11962"
 TEST_PLATE = "180426-6-53-IAV-1B_Plate_11961"

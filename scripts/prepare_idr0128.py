@@ -30,8 +30,8 @@ PROC_IMAGES = PROC_DIR / "images"
 MANIFEST_PATH = PROC_DIR / "manifest.csv"
 
 SEED = 42
-LOW_Q = 0.2
-HIGH_Q = 0.8
+LOW_Q = 0.1
+HIGH_Q = 0.9
 
 # Default caps to keep dataset manageable
 DEFAULT_MAX_TRAIN = 300
