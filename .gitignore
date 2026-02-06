@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+
+# Data
+/Users/rik/projects/FluLens/data/
+/data/
+
+# Node
+/web/node_modules/
+/web/.next/
+
+# OS
+.DS_Store
