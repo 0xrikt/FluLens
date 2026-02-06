@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Prepare a small, reproducible influenza dataset from IDR idr0128.
+Prepare a reproducible influenza dataset from IDR idr0128.
 Downloads selected plates, builds low/high infection labels, and creates
 224x224 PNGs plus a manifest CSV.
 """
+import argparse
 import csv
 import random
-import argparse
 from ftplib import FTP
 from pathlib import Path
 
@@ -16,10 +16,6 @@ from PIL import Image
 
 HOST = "ftp.ebi.ac.uk"
 BASE = "/pub/databases/IDR/idr0128-georgi-influenza/Influenza-20220113-Globus/IAV/3-Screen"
-
-# Plates to use
-TRAIN_PLATE = "180426-6-53-IAV-1A_Plate_11962"
-TEST_PLATE = "180426-6-53-IAV-1B_Plate_11961"
 
 RAW_DIR = Path("/Users/rik/projects/FluLens/data/raw/idr0128")
 PROC_DIR = Path("/Users/rik/projects/FluLens/data/processed/idr0128")
@@ -33,9 +29,9 @@ SEED = 42
 LOW_Q = 0.1
 HIGH_Q = 0.9
 
-# Default caps to keep dataset manageable
-DEFAULT_MAX_TRAIN = 300
-DEFAULT_MAX_VAL = 100
+# Default caps to keep dataset manageable (Scheme A)
+DEFAULT_MAX_TRAIN = 600
+DEFAULT_MAX_VAL = 200
 DEFAULT_MAX_TEST = 200
 
 IMG_SIZE = (224, 224)
@@ -113,6 +109,29 @@ def select_rows(df: pd.DataFrame, low_th: float, high_th: float) -> pd.DataFrame
     return pd.concat([low, high], ignore_index=True)
 
 
+def list_plates(ftp: FTP):
+    plates_dir = f"{BASE}/Data_UZH/Screen"
+    ftp.cwd(plates_dir)
+    entries = []
+    ftp.retrlines("LIST", entries.append)
+    plates = []
+    for line in entries:
+        parts = line.split()
+        name = parts[-1]
+        if "Plate" in name:
+            plates.append(name)
+    return sorted(plates)
+
+
+def split_plates(plates):
+    # Deterministic split by plate order (Scheme A: 4 train, 1 val, 1 test)
+    plates = plates[:6]
+    train = plates[:4]
+    val = plates[4:5]
+    test = plates[5:6]
+    return train, val, test
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--max-train", type=int, default=DEFAULT_MAX_TRAIN)
@@ -129,22 +148,35 @@ def main():
 
     ftp = ftp_connect()
 
-    train_csv = download_imagedata_csv(ftp, TRAIN_PLATE)
-    test_csv = download_imagedata_csv(ftp, TEST_PLATE)
+    plates = list_plates(ftp)
+    train_plates, val_plates, test_plates = split_plates(plates)
 
-    train_df = load_imagedata(train_csv)
+    # Compute thresholds from training plates only
+    train_frames = []
+    for plate in train_plates:
+        train_csv = download_imagedata_csv(ftp, plate)
+        train_frames.append(load_imagedata(train_csv))
+    train_df = pd.concat(train_frames, ignore_index=True)
     low_th = float(train_df["numberOfInfectedNuclei"].quantile(LOW_Q))
     high_th = float(train_df["numberOfInfectedNuclei"].quantile(HIGH_Q))
 
     all_rows = []
 
-    for plate, split in [(TRAIN_PLATE, "trainval"), (TEST_PLATE, "test")]:
-        df = load_imagedata(RAW_RESULTS / f"{plate}_ImageData.csv")
+    for plate in plates[:6]:
+        if plate in train_plates:
+            split = "train"
+        elif plate in val_plates:
+            split = "val"
+        else:
+            split = "test"
+
+        df = load_imagedata(download_imagedata_csv(ftp, plate))
         selected = select_rows(df, low_th, high_th)
-        # Shuffle for train/val split later
         selected = selected.sample(frac=1.0, random_state=SEED).reset_index(drop=True)
-        if split == "trainval":
-            selected = selected.head(args.max_train + args.max_val)
+        if split == "train":
+            selected = selected.head(args.max_train)
+        elif split == "val":
+            selected = selected.head(args.max_val)
         else:
             selected = selected.head(args.max_test)
 
@@ -180,25 +212,15 @@ def main():
                 "image_path": str(out_local),
             })
 
+            # Remove raw files to save disk
+            try:
+                nuc_local.unlink(missing_ok=True)
+                vir_local.unlink(missing_ok=True)
+            except Exception:
+                pass
+
     ftp.quit()
 
-    # Train/val split (3:1) within train plate
-    trainval = [r for r in all_rows if r["split"] == "trainval"]
-    random.shuffle(trainval)
-    val_size = max(1, int(len(trainval) * 0.25))
-    val_set = set(id(x) for x in trainval[:val_size])
-
-    for r in all_rows:
-        if r["split"] == "trainval":
-            r["split"] = "val" if id(r) in val_set else "train"
-
-    # Cap sizes for manageable downloads
-    train = [r for r in all_rows if r["split"] == "train"][: args.max_train]
-    val = [r for r in all_rows if r["split"] == "val"][: args.max_val]
-    test = [r for r in all_rows if r["split"] == "test"][: args.max_test]
-    all_rows = train + val + test
-
-    # Save manifest
     MANIFEST_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(MANIFEST_PATH, "w", newline="") as f:
         writer = csv.DictWriter(
