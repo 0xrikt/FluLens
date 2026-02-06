@@ -55,3 +55,4 @@ npm run dev
 ## Notes
 - Current labels are infection-intensity proxies (low vs high infection). Replace with true infected/uninfected labels when available.
 - See `reports/eval_report.md` for baseline metrics.
+- The web demo runs inference **in the browser** using ONNX Runtime Web. The ONNX model is stored at `web/public/models/flulens.onnx`.

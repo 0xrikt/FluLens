@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import * as ort from "onnxruntime-web";
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -21,19 +22,47 @@ export default function Home() {
     setResult(null);
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
-      const res = await fetch("/api/predict", {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        throw new Error("Prediction failed");
+      ort.env.wasm.wasmPaths =
+        "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/";
+
+      const session = await ort.InferenceSession.create(
+        "/models/flulens.onnx"
+      );
+
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement("canvas");
+      canvas.width = 224;
+      canvas.height = 224;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas unavailable");
+      ctx.drawImage(bitmap, 0, 0, 224, 224);
+      const imageData = ctx.getImageData(0, 0, 224, 224).data;
+
+      const mean = [0.485, 0.456, 0.406];
+      const std = [0.229, 0.224, 0.225];
+      const floatData = new Float32Array(1 * 3 * 224 * 224);
+
+      for (let i = 0; i < 224 * 224; i++) {
+        const r = imageData[i * 4] / 255;
+        const g = imageData[i * 4 + 1] / 255;
+        const b = imageData[i * 4 + 2] / 255;
+        floatData[i] = (r - mean[0]) / std[0];
+        floatData[i + 224 * 224] = (g - mean[1]) / std[1];
+        floatData[i + 2 * 224 * 224] = (b - mean[2]) / std[2];
       }
-      const data = await res.json();
-      setResult({ label: data.label, probability: data.probability });
+
+      const input = new ort.Tensor("float32", floatData, [1, 3, 224, 224]);
+      const output = await session.run({ input });
+      const logits = Array.from(output.logits.data as Float32Array);
+      const max = Math.max(...logits);
+      const exps = logits.map((v) => Math.exp(v - max));
+      const sum = exps.reduce((a, b) => a + b, 0);
+      const probs = exps.map((v) => v / sum);
+
+      const label = probs[1] >= probs[0] ? "High Infection" : "Low Infection";
+      const probability = Math.max(...probs);
+      setResult({ label, probability });
     } catch (err) {
       setError("Prediction failed. Please try another image.");
     } finally {

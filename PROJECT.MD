@@ -119,6 +119,8 @@ cd /Users/rik/projects/FluLens/web
 npm install
 npm run build
 ```
+网页端使用 ONNX Runtime Web 在浏览器内完成推理，模型文件位于：
+`web/public/models/flulens.onnx`
 
 ## 5. 程序员开发建议
 1. **代码适配**：使用 `torch.device("mps")` 替代 `cuda`。

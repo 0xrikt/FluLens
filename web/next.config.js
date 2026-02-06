@@ -5,12 +5,6 @@ const nextConfig = {
       allowedOrigins: ["*"],
     },
   },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = [...(config.externals || []), "onnxruntime-node"];
-    }
-    return config;
-  },
 };
 
 module.exports = nextConfig;
