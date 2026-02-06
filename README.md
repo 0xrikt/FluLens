@@ -1,10 +1,10 @@
 # FluLens
 
-Influenza infection intensity screening using a ResNeSt-50 backbone with channel and spatial attention, adapted from the malaria BYOL + attention paper.
+Influenza A (IAV) infection intensity screening using a ResNeSt-50 backbone with channel and spatial attention, adapted from the malaria BYOL + attention paper.
 
 # FluLens（中文说明）
 
-基于 ResNeSt-50 主干与通道/空间注意力的流感感染强度筛查系统，技术路线参考疟原虫 BYOL + 注意力论文并做迁移实现。
+基于 ResNeSt-50 主干与通道/空间注意力的**甲型流感（IAV）感染强度**筛查系统，技术路线参考疟原虫 BYOL + 注意力论文并做迁移实现。
 
 ## What’s Included
 - Training pipeline (PyTorch)
@@ -107,11 +107,13 @@ npm run dev
 ```
 
 ## Notes
-- Current labels are infection-intensity proxies (low vs high infection). Replace with true infected/uninfected labels when available.
+- Current labels are infection-intensity proxies (low vs high infection). This demo uses **Influenza A (IAV)** data, not avian influenza.
+- Replace with true infected/uninfected labels when available.
 - See `reports/eval_report.md` for baseline metrics.
 - The web demo runs inference in the browser using ONNX Runtime Web. The ONNX model is stored at `web/public/models/flulens.onnx`.
 
 ## 说明
-- 当前标签为感染强度替代口径（低/高），非严格感染/未感染。若有真实标注，请替换后重训。
+- 当前标签为感染强度替代口径（低/高），非严格感染/未感染；当前数据为**甲型流感 IAV**，非禽流感。
+- 若有真实标注，请替换后重训。
 - 评估结果见 `reports/eval_report.md`。
 - 网页端在浏览器内进行推理（ONNX Runtime Web），模型位于 `web/public/models/flulens.onnx`。

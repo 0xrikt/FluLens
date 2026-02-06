@@ -3,7 +3,7 @@
 日期 / Date: 2026-02-06
 
 ## 数据集 / Dataset
-- 来源 / Source: IDR idr0128 (Georgi et al. Influenza A virus screen)
+- 来源 / Source: IDR idr0128 (Georgi et al. Influenza A virus screen) — **IAV (甲型流感)**
 - 切分策略 / Split strategy: **按 plate 切分**（避免数据泄漏）
   - 训练 / Train: 4 plates
   - 验证 / Val: 1 plate

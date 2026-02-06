@@ -1,10 +1,10 @@
 # 项目技术规格说明书：流感病毒 AI 智能检测系统
 
 ## 1. 项目背景与目标
-[cite_start]本项目旨在复刻《一种基于自监督学习和注意力机制的疟原虫智能检测方法.pdf》的核心技术方案 [cite: 25, 32, 33][cite_start]。将其迁移至流感/禽流感病毒检测领域，通过自监督预训练解决小样本标记难题 [cite: 46, 127][cite_start]，并利用双重注意力机制捕获极其微小的病毒颗粒特征 [cite: 42, 44]。
+[cite_start]本项目旨在复刻《一种基于自监督学习和注意力机制的疟原虫智能检测方法.pdf》的核心技术方案 [cite: 25, 32, 33][cite_start]。将其迁移至**流感病毒检测领域（当前实现为甲型流感 IAV）**，通过自监督预训练解决小样本标记难题 [cite: 46, 127][cite_start]，并利用双重注意力机制捕获极其微小的病毒颗粒特征 [cite: 42, 44]。
 
 ### 1.1 当前数据源与标注口径（实现版）
-由于暂无真实流感/禽流感阳性/阴性标注数据，本项目当前实现基于公开数据集 **IDR idr0128 (Georgi et al. Influenza A virus screen)**。该数据集中以高内涵显微成像记录了感染强度，`ImageData.csv` 提供每张图像的 `numberOfInfectedNuclei` 等指标。
+由于暂无真实流感/禽流感阳性/阴性标注数据，本项目当前实现基于公开数据集 **IDR idr0128 (Georgi et al. Influenza A virus screen)**。该数据集对应**甲型流感 IAV**，以高内涵显微成像记录感染强度，`ImageData.csv` 提供每张图像的 `numberOfInfectedNuclei` 等指标。
 
 为保证可训练、可评估，本实现将二分类定义为：
 * **低感染 (label=0)**：`numberOfInfectedNuclei` 位于训练集 **10% 分位及以下**。
