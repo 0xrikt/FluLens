@@ -12,11 +12,61 @@ Influenza A (IAV) infection intensity screening using a ResNeSt-50 backbone with
 - ONNX export
 - Web demo (Next.js + onnxruntime-web)
 
+## Scope vs. Paper (English)
+**Full paper pipeline should include:**
+- Large expert-labeled dataset
+- Cell segmentation + masking strategy
+- BYOL self-supervised pretraining (positive samples only)
+- ResNeSt-50 + channel/spatial attention supervised training
+- Paper-matched data augmentations and fine-tuning strategy
+
+**This repo currently implements:**
+- IAV dataset prep with plate-level split
+- ResNeSt-50 + channel/spatial attention supervised training
+- Lightweight augmentations
+- ONNX export + browser inference demo
+
+**Not yet implemented (and why):**
+- Cell segmentation + masking (needs a dedicated segmentation pipeline)
+- BYOL pretraining (needs much larger positive dataset and longer training time)
+- Paper-matched augmentation/finetune details (requires strict hyperparameter alignment)
+
+**To fully reproduce the paper:**
+- More positive samples
+- Segmentation module
+- Longer training budget for BYOL + finetune
+- Strict hyperparameter match to the paper
+
 ## 包含内容
 - 训练流程（PyTorch）
 - 评估脚本与报告
 - ONNX 导出
 - Web Demo（Next.js + onnxruntime-web）
+
+## 与论文流程对照（中文）
+**论文完整流程应包含：**
+- 大规模专家标注数据
+- 细胞分割 + 掩膜策略
+- BYOL 自监督预训练（仅阳性样本）
+- ResNeSt-50 + 通道/空间注意力的监督训练
+- 与论文一致的增强与微调策略
+
+**当前仓库已实现：**
+- IAV 数据集准备与 plate 级切分
+- ResNeSt-50 + 通道/空间注意力监督训练
+- 轻量数据增强
+- ONNX 导出 + 浏览器内推理 Demo
+
+**尚未实现（原因）：**
+- 细胞分割 + 掩膜（需要专门的分割流水线）
+- BYOL 预训练（需要更大量阳性样本与更长训练时间）
+- 论文级增强与微调细节（需要严格对齐超参）
+
+**完整复现所需条件：**
+- 更多阳性样本
+- 分割模块
+- 更长训练预算（BYOL + 微调）
+- 论文超参严格对齐
 
 ## Quick Start
 
